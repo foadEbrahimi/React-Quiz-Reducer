@@ -1,13 +1,16 @@
 import React from 'react';
+import Header from './components/Header';
+import Main from './components/Main';
 
-import DateCounter from './DateCounter';
-import Banker from './components/Banker';
 export default function App() {
   return (
-    <div>
-      <Banker />
-      {/* <DateCounter /> */}
-      {/* Hello CL9S */}
+    <div className="app">
+      <Header />
+
+      <Main>
+        <p>1/15</p>
+        <p>Question?</p>
+      </Main>
     </div>
   );
 }
