@@ -1,10 +1,10 @@
 import React, { useEffect, useReducer } from 'react';
+import Error from './components/Err&Loa/Error';
+import Loader from './components/Err&Loa/Loader';
 import Header from './components/Header/Header';
 import Main from './components/Main';
-import Loader from './components/Err&Loa/Loader';
-import Error from './components/Err&Loa/Error';
-import StartScreen from './components/StartScreen';
 import Questions from './components/Questions/Questions';
+import StartScreen from './components/StartScreen';
 
 const initialState = {
   questions: [],
@@ -12,6 +12,8 @@ const initialState = {
   // 'loading', 'error', 'ready', 'active', 'finished'
   status: 'loading',
   index: 0,
+  answer: null,
+  points: 0,
 };
 
 function reducer(state, action) {
@@ -34,6 +36,17 @@ function reducer(state, action) {
         ...state,
         status: 'active',
       };
+      
+    case 'newAnswer':
+      const question = state.questions.at(state.index);
+      return {
+        ...state,
+        answer: action.payload,
+        points:
+          action.payload === question.correctOption
+            ? state.points + question.points
+            : state.points,
+      };
 
     default:
       throw new Error('Action unknown');
@@ -41,7 +54,7 @@ function reducer(state, action) {
 }
 
 export default function App() {
-  const [{ questions, status, index }, dispatch] = useReducer(
+  const [{ questions, status, index, answer }, dispatch] = useReducer(
     reducer,
     initialState
   );
@@ -68,7 +81,13 @@ export default function App() {
         {status === 'ready' && (
           <StartScreen numQuestions={questions.length} dispatch={dispatch} />
         )}
-        {status === 'active' && <Questions question={questions[index]} />}
+        {status === 'active' && (
+          <Questions
+            question={questions[index]}
+            dispatch={dispatch}
+            answer={answer}
+          />
+        )}
       </Main>
     </div>
   );
