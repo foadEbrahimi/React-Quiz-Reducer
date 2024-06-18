@@ -5,6 +5,9 @@ import Header from './components/Header/Header';
 import Main from './components/Main';
 import Questions from './components/Questions/Questions';
 import StartScreen from './components/StartScreen';
+import NextQuestion from './components/Questions/NextQuestion';
+import Progress from './components/Questions/Progress';
+import FinishedScreen from './components/FinishedScreen';
 
 const initialState = {
   questions: [],
@@ -14,6 +17,7 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
+  higtScore: 0,
 };
 
 function reducer(state, action) {
@@ -36,7 +40,7 @@ function reducer(state, action) {
         ...state,
         status: 'active',
       };
-      
+
     case 'newAnswer':
       const question = state.questions.at(state.index);
       return {
@@ -48,15 +52,31 @@ function reducer(state, action) {
             : state.points,
       };
 
+    case 'nextQuestion':
+      return {
+        ...state,
+        index: state.index + 1,
+        answer: null,
+      };
+    case 'finish':
+      return {
+        ...state,
+        status: 'finished',
+        higtScore:
+          state.points > state.higtScore ? state.points : state.higtScore,
+      };
+
     default:
       throw new Error('Action unknown');
   }
 }
 
 export default function App() {
-  const [{ questions, status, index, answer }, dispatch] = useReducer(
-    reducer,
-    initialState
+  const [{ questions, status, index, answer, points, higtScore }, dispatch] =
+    useReducer(reducer, initialState);
+  const maxPossiblePoints = questions.reduce(
+    (prev, next) => prev + next.points,
+    0
   );
 
   useEffect(() => {
@@ -73,19 +93,39 @@ export default function App() {
     <div className="app">
       <Header />
       <Main>
-        {/* <p>1/15</p>
-        <p>Question?</p>
-        <h1>CL9</h1> */}
+        {/*<h1>CL9</h1> */}
         {status === 'loading' && <Loader />}
         {status === 'error' && <Error />}
         {status === 'ready' && (
           <StartScreen numQuestions={questions.length} dispatch={dispatch} />
         )}
         {status === 'active' && (
-          <Questions
-            question={questions[index]}
-            dispatch={dispatch}
-            answer={answer}
+          <>
+            <Progress
+              index={index}
+              numQuestions={questions.length}
+              points={points}
+              maxPossiblePoints={maxPossiblePoints}
+              answer={answer}
+            />
+            <Questions
+              question={questions[index]}
+              dispatch={dispatch}
+              answer={answer}
+            />
+            <NextQuestion
+              dispatch={dispatch}
+              answer={answer}
+              index={index}
+              numQuestions={questions.length}
+            />
+          </>
+        )}
+        {status === 'finished' && (
+          <FinishedScreen
+            points={points}
+            higtScore={higtScore}
+            maxPossiblePoints={maxPossiblePoints}
           />
         )}
       </Main>
