@@ -58,12 +58,20 @@ function reducer(state, action) {
         index: state.index + 1,
         answer: null,
       };
+
     case 'finish':
       return {
         ...state,
         status: 'finished',
         higtScore:
           state.points > state.higtScore ? state.points : state.higtScore,
+      };
+
+    case 'reset':
+      return {
+        ...initialState,
+        question: state.questions,
+        status: 'ready',
       };
 
     default:
@@ -123,6 +131,7 @@ export default function App() {
         )}
         {status === 'finished' && (
           <FinishedScreen
+            dispatch={dispatch}
             points={points}
             higtScore={higtScore}
             maxPossiblePoints={maxPossiblePoints}
