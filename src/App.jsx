@@ -2,13 +2,16 @@ import React, { useEffect, useReducer } from 'react';
 import Error from './components/Err&Loa/Error';
 import Loader from './components/Err&Loa/Loader';
 import Header from './components/Header/Header';
+import Footer from './components/Footer';
 import Main from './components/Main';
 import Questions from './components/Questions/Questions';
 import StartScreen from './components/StartScreen';
 import NextQuestion from './components/Questions/NextQuestion';
 import Progress from './components/Questions/Progress';
 import FinishedScreen from './components/FinishedScreen';
+import Timer from './components/Timer';
 
+const SECS_PER_QUESTION = 30;
 const initialState = {
   questions: [],
 
@@ -18,8 +21,8 @@ const initialState = {
   answer: null,
   points: 0,
   higtScore: 0,
+  secondsRemaining: null,
 };
-
 function reducer(state, action) {
   switch (action.type) {
     case 'dataReceived':
@@ -39,6 +42,7 @@ function reducer(state, action) {
       return {
         ...state,
         status: 'active',
+        secondsRemaining: state.questions.length * SECS_PER_QUESTION,
       };
 
     case 'newAnswer':
@@ -74,14 +78,25 @@ function reducer(state, action) {
         status: 'ready',
       };
 
+    case 'tick':
+      return {
+        ...state,
+        // question: state.questions,
+        // status: 'finish',
+        secondsRemaining: state.secondsRemaining - 1,
+        status: state.secondsRemaining === 0 ? 'finished' : state.status,
+      };
+
     default:
       throw new Error('Action unknown');
   }
 }
 
 export default function App() {
-  const [{ questions, status, index, answer, points, higtScore }, dispatch] =
-    useReducer(reducer, initialState);
+  const [
+    { questions, status, index, answer, points, higtScore, secondsRemaining },
+    dispatch,
+  ] = useReducer(reducer, initialState);
   const maxPossiblePoints = questions.reduce(
     (prev, next) => prev + next.points,
     0
@@ -97,6 +112,7 @@ export default function App() {
       )
       .catch(err => dispatch({ type: 'dataFailed' }));
   }, []);
+
   return (
     <div className="app">
       <Header />
@@ -121,12 +137,15 @@ export default function App() {
               dispatch={dispatch}
               answer={answer}
             />
-            <NextQuestion
-              dispatch={dispatch}
-              answer={answer}
-              index={index}
-              numQuestions={questions.length}
-            />
+            <footer>
+              <Timer dispatch={dispatch} secondsRemaining={secondsRemaining} />
+              <NextQuestion
+                dispatch={dispatch}
+                answer={answer}
+                index={index}
+                numQuestions={questions.length}
+              />
+            </footer>
           </>
         )}
         {status === 'finished' && (
