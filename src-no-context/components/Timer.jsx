@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
-import { useQuiz } from '../context/QuizProvider';
 
-export default function Timer() {
-  const { dispatch, secondsRemaining } = useQuiz();
+export default function Timer({ dispatch, secondsRemaining }) {
   const mins = Math.floor(secondsRemaining / 60);
   const secs = Math.floor(secondsRemaining % 60);
   useEffect(() => {
